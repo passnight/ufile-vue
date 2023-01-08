@@ -1,10 +1,7 @@
 module.exports = {
   // important: true,
   mode: 'jit',
-  content: [
-      './index.html',
-      './src/**/*.{vue,js,ts,jsx,tsx}',
-  ],
+  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   theme: {
     // textColor: {
     //   'danger': '#ffed4a',
@@ -13,20 +10,18 @@ module.exports = {
     // },
     extend: {
       spacing: {
-        '26': '6.5rem',
+        26: '6.5rem',
       },
       colors: {
-        'info': '#2d8cf0'
+        info: '#2d8cf0',
       },
       backgroundColor: {
-        'blue-info': '#2d8cf0'
+        'blue-info': '#2d8cf0',
       },
     },
   },
   variants: {
     extend: {},
   },
-  plugins: [
-    require('@tailwindcss/line-clamp')
-  ],
+  plugins: [require('@tailwindcss/line-clamp')],
 }

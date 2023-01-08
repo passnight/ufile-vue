@@ -2,95 +2,115 @@
   <div>
     <div class="float-right mb-1">
       <span>背景颜色: </span>
-      <el-color-picker v-model="color" show-alpha :predefine="predefineColors" />
+      <el-color-picker
+        v-model="color"
+        show-alpha
+        :predefine="predefineColors"
+      />
     </div>
     <vue3dLoader
       v-if="loadFinish"
       class="h-[75vh] clear-right"
-      :fileType="fileSuffix"
-      :mtlPath="mtlPath"
-      :backgroundColor="color"
-      :filePath='fileLinkUrl'>
+      :file-type="fileSuffix"
+      :mtl-path="mtlPath"
+      :background-color="color"
+      :file-path="fileLinkUrl"
+    >
     </vue3dLoader>
   </div>
-
 </template>
 
 <script setup>
-import { vue3dLoader } from "vue-3d-loader";
+import { vue3dLoader } from 'vue-3d-loader'
 
-import useFilePwd from "~/composables/file/useFilePwd";
-let { getPathPwd } = useFilePwd();
+import useFilePwd from '~/composables/file/useFilePwd'
+let { getPathPwd } = useFilePwd()
 
-import useFilePreview from "~/composables/file/useFilePreview";
-const { dialogVideoVisible, dialogTextVisible, dialogPdfVisible, dialogOfficeVisible, dialog3dVisible } = useFilePreview();
+import useFilePreview from '~/composables/file/useFilePreview'
+const {
+  dialogVideoVisible,
+  dialogTextVisible,
+  dialogPdfVisible,
+  dialogOfficeVisible,
+  dialog3dVisible,
+} = useFilePreview()
 
-import useRouterData from "~/composables/useRouterData";
-let { currentPath, storageKey } = useRouterData();
+import useRouterData from '~/composables/useRouterData'
+let { currentPath, storageKey } = useRouterData()
 
-import useStorageConfigStore from "~/stores/storage-config";
-let storageConfigStore = useStorageConfigStore();
+import useStorageConfigStore from '~/stores/storage-config'
+let storageConfigStore = useStorageConfigStore()
 
-import { loadFileItemReq } from "~/api/home";
-import common from "~/common";
+import { loadFileItemReq } from '~/api/home'
+import common from '~/common'
 
-const loadFinish = ref(false);
-let mtlPath = ref();
+const loadFinish = ref(false)
+let mtlPath = ref()
 
 // 组件接收的属性：
 //  fileUrl:    文件下载路径
 //  fileName:   文件名
 const props = defineProps({
   fileUrl: String,
-  fileName: String
-});
-
-onMounted(() => {
-  init();
+  fileName: String,
 })
 
-let fileSuffix = common.getFileSuffix(props.fileName);
-let fileLinkUrl = ref();
+onMounted(() => {
+  init()
+})
+
+let fileSuffix = common.getFileSuffix(props.fileName)
+let fileLinkUrl = ref()
 
 const init = async () => {
-
   // 完整路径
-  let pathAndName = common.removeDuplicateSeparator(`${currentPath.value}/${props.fileName}`);
+  let pathAndName = common.removeDuplicateSeparator(
+    `${currentPath.value}/${props.fileName}`
+  )
 
   // 完整直链路径
-  fileLinkUrl.value = common.removeDuplicateSeparator(storageConfigStore.globalConfig.domain + "/" +
-    storageConfigStore.globalConfig.directLinkPrefix + "/" +
-    storageKey.value + "/" +
-    pathAndName);
+  fileLinkUrl.value = common.removeDuplicateSeparator(
+    storageConfigStore.globalConfig.domain +
+      '/' +
+      storageConfigStore.globalConfig.directLinkPrefix +
+      '/' +
+      storageKey.value +
+      '/' +
+      pathAndName
+  )
 
-  if (fileSuffix === ".obj") {
-    let basicName = common.getFileName(props.fileName);
+  if (fileSuffix === '.obj') {
+    let basicName = common.getFileName(props.fileName)
 
-    let mtlPathAndName = common.removeDuplicateSeparator(`${currentPath.value}/${basicName}.mtl`);
+    let mtlPathAndName = common.removeDuplicateSeparator(
+      `${currentPath.value}/${basicName}.mtl`
+    )
 
     let mtlFileItemParam = {
       storageKey: storageKey.value,
       path: mtlPathAndName,
-      password: getPathPwd()
+      password: getPathPwd(),
     }
 
-    let fileItemResult = await loadFileItemReq(mtlFileItemParam);
+    let fileItemResult = await loadFileItemReq(mtlFileItemParam)
 
     if (fileItemResult?.data?.code === 0) {
-      console.log('检测到当前存在 mtl 纹理文件: ' + mtlFileItemParam, fileItemResult);
-      mtlPath.value = fileItemResult.data.data.url;
+      console.log(
+        '检测到当前存在 mtl 纹理文件: ' + mtlFileItemParam,
+        fileItemResult
+      )
+      mtlPath.value = fileItemResult.data.data.url
     }
   }
 
-  loadFinish.value = true;
+  loadFinish.value = true
 }
 
 onUnmounted(() => {
-  mtlPath.value = null;
+  mtlPath.value = null
 })
 
-
-const color = useStorage('zfile-3d-color', '#ffffff');
+const color = useStorage('zfile-3d-color', '#ffffff')
 
 const predefineColors = ref([
   '#ff4500',
@@ -108,9 +128,6 @@ const predefineColors = ref([
   'hsla(209, 100%, 56%, 0.73)',
   '#c7158577',
 ])
-
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

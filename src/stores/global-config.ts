@@ -5,14 +5,14 @@ const useGlobalConfigStore = defineStore('globalConfigStore', {
   state: () => {
     return {
       zfileConfig: {
-        baseUrl: "",
+        baseUrl: '',
         router: {
-          mode: "history"
+          mode: 'history',
         },
         skeleton: {
           enable: true,
-          show: "always",
-          size: 20
+          show: 'always',
+          size: 20,
         },
         gallery: {
           mobileColumn: 5,
@@ -20,23 +20,23 @@ const useGlobalConfigStore = defineStore('globalConfigStore', {
           columnSpacing: 50,
           rowSpacing: 10,
           showInfo: true,
-          showInfoMode: "hover",
+          showInfoMode: 'hover',
           roundedBorder: true,
           showBackTop: true,
         },
         imagePreview: {
-          mode: "full",
-          gallery: true
+          mode: 'full',
+          gallery: true,
         },
-        officePreview: {}
-      }
+        officePreview: {},
+      },
     }
   },
   actions: {
     updateZfileConfig(val: any) {
       this.zfileConfig = val
-    }
+    },
   },
 })
 
-export default useGlobalConfigStore;
+export default useGlobalConfigStore

@@ -1,19 +1,36 @@
 <template>
   <div class="zfile-index-body-wrapper" @contextmenu="showFileMenu">
-    <div class="zfile-index-body"
-         :class="storageConfigStore.globalConfig?.layout === 'center' ? 'zfile-index-table-center' : ''">
-
+    <div
+      class="zfile-index-body"
+      :class="
+        storageConfigStore.globalConfig?.layout === 'center'
+          ? 'zfile-index-table-center'
+          : ''
+      "
+    >
       <!-- 公告 -->
-      <el-alert v-if="storageConfigStore.globalConfig.showAnnouncement && storageConfigStore.globalConfig.announcement" class="zfile-index-announcement" type="success">
-        <v-md-preview :text="storageConfigStore.globalConfig.announcement"></v-md-preview>
+      <el-alert
+        v-if="
+          storageConfigStore.globalConfig.showAnnouncement &&
+          storageConfigStore.globalConfig.announcement
+        "
+        class="zfile-index-announcement"
+        type="success"
+      >
+        <v-md-preview
+          :text="storageConfigStore.globalConfig.announcement"
+        ></v-md-preview>
       </el-alert>
 
       <!-- 文档模式显示 -->
-      <el-card v-if="storageConfigStore.globalConfig.showDocument
+      <el-card
+v-if="storageConfigStore.globalConfig.showDocument
                 && route.params.storageKey
                 && storageConfigStore.folderConfig.readmeDisplayMode === 'top'
                 && storageConfigStore.folderConfig.readmeText" class="my-3" >
-        <v-md-preview :text="storageConfigStore.folderConfig.readmeText"></v-md-preview>
+        <v-md-preview
+          :text="storageConfigStore.folderConfig.readmeText"
+        ></v-md-preview>
       </el-card>
 
       <!-- 文件区 -->
@@ -24,25 +41,29 @@
         v-loading="basicLoading"
         element-loading-text="拼命加载中"
         element-loading-background="rgba(255, 255, 255, 0.6)"
+        :size="storageConfigStore.globalConfig?.tableSize"
+        empty-text=""
+        :row-class-name="tableRowClassName"
+        :data="skeletonLoading ? skeletonData : fileDataStore.fileList"
         @sort-change="sortChangeMethod"
         @row-click="tableClickRow"
         @row-dblclick="tableDbClickRow"
         @cell-mouse-enter="tableHoverRow"
         @cell-mouse-leave="tableLeaveRow"
-        :size="storageConfigStore.globalConfig?.tableSize"
-        empty-text=""
         @row-contextmenu="showFileMenu"
-        :row-class-name="tableRowClassName"
-        @selection-change="selectRowsChange"
-        :data="skeletonLoading ? skeletonData : fileDataStore.fileList">
+        @selection-change="selectRowsChange">
         <template #empty>
           <div v-show="!basicLoading">
-            <svg-icon class="empty-icon" name="empty"/>
+            <svg-icon class="empty-icon" name="empty" />
             <div class="font-bold text-base">数据为空，请先上传或添加文件</div>
           </div>
         </template>
 
-        <el-table-column width="30px" type="selection" :selectable="checkSelectable">
+        <el-table-column
+          width="30px"
+          type="selection"
+          :selectable="checkSelectable"
+        >
         </el-table-column>
 
         <el-table-column
@@ -50,10 +71,11 @@
           sortable="custom"
           class-name="zfile-table-col-name"
           label-class-name="table-header-left"
-          min-width="100%">
+          min-width="100%"
+        >
           <template #header>
             <el-icon>
-              <Document/>
+              <Document />
             </el-icon>
             <span>文件名</span>
           </template>
@@ -61,9 +83,17 @@
             <div v-show="skeletonLoading">
               <el-skeleton animated>
                 <template #template>
-                  <el-skeleton-item variant="circle"
-                                    style="vertical-align: middle;width: 18px; height: 18px; margin-right: 20px" />
-                  <el-skeleton-item variant="text"
+                  <el-skeleton-item
+                    variant="circle"
+                    style="
+                      vertical-align: middle;
+                      width: 18px;
+                      height: 18px;
+                      margin-right: 20px;
+                    "
+                  />
+                  <el-skeleton-item
+variant="text"
                                     style="vertical-align: middle;width: 30%;"/>
                 </template>
               </el-skeleton>
@@ -76,14 +106,15 @@
         </el-table-column>
 
         <el-table-column
-          prop="time"
           v-if="isNotMobile"
+          prop="time"
           sortable="custom"
           class-name="zfile-table-col-time"
-          min-width="25%">
+          min-width="25%"
+        >
           <template #header>
             <el-icon>
-              <Calendar/>
+              <Calendar />
             </el-icon>
             <span>修改时间</span>
           </template>
@@ -91,7 +122,7 @@
             <div v-show="skeletonLoading">
               <el-skeleton animated>
                 <template #template>
-                  <el-skeleton-item variant="text" style="width: 60%"/>
+                  <el-skeleton-item variant="text" style="width: 60%" />
                 </template>
               </el-skeleton>
             </div>
@@ -102,14 +133,15 @@
         </el-table-column>
 
         <el-table-column
-          prop="size"
           v-if="isNotMobile"
+          prop="size"
           class-name="zfile-table-col-size"
           sortable="custom"
-          min-width="20%">
+          min-width="20%"
+        >
           <template #header>
             <el-icon>
-              <Coin/>
+              <Coin />
             </el-icon>
             <span>大小</span>
           </template>
@@ -117,7 +149,7 @@
             <div v-show="skeletonLoading">
               <el-skeleton animated>
                 <template #template>
-                  <el-skeleton-item variant="text" style="width: 30%"/>
+                  <el-skeleton-item variant="text" style="width: 30%" />
                 </template>
               </el-skeleton>
             </div>
@@ -132,44 +164,62 @@
       <file-gallery v-if="fileDataStore.imgMode"></file-gallery>
 
       <!-- 右键菜单 -->
-      <Contextmenu auto-ajust-placement ref="contextmenu">
+      <Contextmenu ref="contextmenu" auto-ajust-placement>
         <template v-if="contextMenuTargetFile">
-          <ContextmenuItem v-show="storageConfigStore.permission.open"
-                           @click="openRow(selectRow)">
+          <ContextmenuItem
+            v-show="storageConfigStore.permission.open"
+            @click="openRow(selectRow)"
+          >
             <el-icon class="contextmenu-icon">
-              <FolderOpened/>
+              <FolderOpened />
             </el-icon>
             <label>打开</label>
           </ContextmenuItem>
-          <ContextmenuItem v-show="storageConfigStore.permission.preview"
-                           @click="openRow(selectRow)">
+          <ContextmenuItem
+            v-show="storageConfigStore.permission.preview"
+            @click="openRow(selectRow)"
+          >
             <el-icon class="contextmenu-icon">
-              <i-custom-preview/>
+              <i-custom-preview />
             </el-icon>
             <label>预览</label>
           </ContextmenuItem>
-          <ContextmenuItem v-show="storageConfigStore.permission.download"
-                           @click="batchDownloadFile">
+          <ContextmenuItem
+            v-show="storageConfigStore.permission.download"
+            @click="batchDownloadFile"
+          >
             <el-icon class="contextmenu-icon">
-              <i-custom-download class="font-bold" v-if="selectStatistics.isSingleSelect"/>
-              <i-custom-download-mult v-else/>
+              <i-custom-download
+                v-if="selectStatistics.isSingleSelect"
+                class="font-bold"
+              />
+              <i-custom-download-mult v-else />
             </el-icon>
             <label>
               {{ selectStatistics.isSingleSelect ? '下载' : '批量下载' }}
             </label>
           </ContextmenuItem>
-          <ContextmenuItem v-show="storageConfigStore.permission.link"
-                           @click="openLinkDialog">
+          <ContextmenuItem
+            v-show="storageConfigStore.permission.link"
+            @click="openLinkDialog"
+          >
             <el-icon class="contextmenu-icon">
               <svg-icon class="inline" name="link"></svg-icon>
             </el-icon>
             <label>生成直链</label>
           </ContextmenuItem>
-          <ContextmenuDivider v-show="storageConfigStore.permission.rename || storageConfigStore.permission.delete"></ContextmenuDivider>
-          <ContextmenuItem v-show="storageConfigStore.permission.rename"
-                           @click="rename">
+          <ContextmenuDivider
+            v-show="
+              storageConfigStore.permission.rename ||
+              storageConfigStore.permission.delete
+            "
+          ></ContextmenuDivider>
+          <ContextmenuItem
+            v-show="storageConfigStore.permission.rename"
+            @click="rename"
+          >
             <el-icon class="contextmenu-icon">
-              <svg-icon name="edit"/>
+              <svg-icon name="edit" />
             </el-icon>
             <label>重命名</label>
           </ContextmenuItem>
@@ -186,89 +236,130 @@
           <!--	</el-icon>-->
           <!--	<label>复制</label>-->
           <!--</ContextmenuItem>-->
-          <ContextmenuItem v-if="storageConfigStore.permission.delete" @click="batchDelete">
+          <ContextmenuItem
+            v-if="storageConfigStore.permission.delete"
+            @click="batchDelete"
+          >
             <el-icon class="contextmenu-icon">
               <svg-icon class="inline" name="delete"></svg-icon>
             </el-icon>
-            <label>删除 {{selectRows.length > 0 ? ('(' + selectRows.length + ')') : ''}}</label>
+            <label
+              >删除
+              {{
+                selectRows.length > 0 ? '(' + selectRows.length + ')' : ''
+              }}</label
+            >
           </ContextmenuItem>
-          <ContextmenuDivider v-show="storageConfigStore.permission.newFolder || storageConfigStore.permission.upload"></ContextmenuDivider>
+          <ContextmenuDivider
+            v-show="
+              storageConfigStore.permission.newFolder ||
+              storageConfigStore.permission.upload
+            "
+          ></ContextmenuDivider>
         </template>
-        <ContextmenuItem v-show="storageConfigStore.permission.newFolder" @click="newFolder">
+        <ContextmenuItem
+          v-show="storageConfigStore.permission.newFolder"
+          @click="newFolder"
+        >
           <el-icon class="contextmenu-icon">
-            <FolderOpened/>
+            <FolderOpened />
           </el-icon>
           <label>新建文件夹</label>
         </ContextmenuItem>
-        <ContextmenuItem v-show="storageConfigStore.permission.upload" @click="openUploadDialog">
+        <ContextmenuItem
+          v-show="storageConfigStore.permission.upload"
+          @click="openUploadDialog"
+        >
           <el-icon class="contextmenu-icon">
-            <i-custom-upload/>
+            <i-custom-upload />
           </el-icon>
           <label>上传文件</label>
         </ContextmenuItem>
-        <ContextmenuItem v-show="storageConfigStore.permission.upload" @click="openUploadFolderDialog">
+        <ContextmenuItem
+          v-show="storageConfigStore.permission.upload"
+          @click="openUploadFolderDialog"
+        >
           <el-icon class="contextmenu-icon">
-            <i-custom-upload-folder/>
+            <i-custom-upload-folder />
           </el-icon>
           <label>上传文件夹</label>
         </ContextmenuItem>
 
-        <ContextmenuDivider v-show="storageConfigStore.permission.newFolder || storageConfigStore.permission.upload"></ContextmenuDivider>
+        <ContextmenuDivider
+          v-show="
+            storageConfigStore.permission.newFolder ||
+            storageConfigStore.permission.upload
+          "
+        ></ContextmenuDivider>
         <ContextmenuItem @click="reload">
           <el-icon class="contextmenu-icon">
-            <i-custom-refresh/>
+            <i-custom-refresh />
           </el-icon>
           <label>刷新</label>
         </ContextmenuItem>
-
-
       </Contextmenu>
 
       <!-- 视频播放器 -->
-      <el-dialog draggable custom-class="zfile-video-dialog" :destroy-on-close="true"
-                 v-model="dialogVideoVisible">
-        <video-player v-if="dialogVideoVisible" ref="videoPlayer"/>
+      <el-dialog
+v-model="dialogVideoVisible" draggable custom-class="zfile-video-dialog"
+                 :destroy-on-close="true">
+        <video-player v-if="dialogVideoVisible" ref="videoPlayer" />
       </el-dialog>
 
       <!-- 文本编辑器 -->
-      <el-dialog draggable custom-class="zfile-text-dialog zfile-dialog-mini-close" :destroy-on-close="true"
-                 :title="fileDataStore.currentClickRow.name"
-                 v-model="dialogTextVisible">
-        <TextViewer :file-name="fileDataStore.currentClickRow.name"
-                    :file-url="fileDataStore.currentClickRow.url"
-                    v-if="dialogTextVisible && fileDataStore.currentClickRow.name.indexOf('.md') === -1"/>
-        <MarkdownViewer :file-name="fileDataStore.currentClickRow.name"
-                        :file-url="fileDataStore.currentClickRow.url"
-                        v-if="dialogTextVisible && fileDataStore.currentClickRow.name.indexOf('.md') !== -1"/>
+      <el-dialog
+v-model="dialogTextVisible" draggable custom-class="zfile-text-dialog zfile-dialog-mini-close"
+        :destroy-on-close="true"
+        :title="fileDataStore.currentClickRow.name"
+      >
+        <TextViewer
+          v-if="dialogTextVisible && fileDataStore.currentClickRow.name.indexOf('.md') === -1"
+          :file-name="fileDataStore.currentClickRow.name"
+                    :file-url="fileDataStore.currentClickRow.url"/>
+        <MarkdownViewer
+          v-if="
+            dialogTextVisible &&
+            fileDataStore.currentClickRow.name.indexOf('.md') !== -1
+          "
+          :file-name="fileDataStore.currentClickRow.name"
+          :file-url="fileDataStore.currentClickRow.url"
+        />
       </el-dialog>
 
       <!-- pdf 在线预览 -->
-      <el-dialog draggable custom-class="zfile-pdf-dialog"
-                 :title="fileDataStore.currentClickRow.name"
-                 v-model="dialogPdfVisible">
-        <PdfViewer :file-name="fileDataStore.currentClickRow.name"
-                   :file-url="fileDataStore.currentClickRow.url"
-                   v-if="dialogPdfVisible"/>
+      <el-dialog
+v-model="dialogPdfVisible" draggable
+        custom-class="zfile-pdf-dialog"
+                 :title="fileDataStore.currentClickRow.name">
+        <PdfViewer
+          v-if="dialogPdfVisible"
+          :file-name="fileDataStore.currentClickRow.name"
+          :file-url="fileDataStore.currentClickRow.url"
+        />
       </el-dialog>
 
       <!-- office 在线预览 -->
-      <el-dialog draggable custom-class="zfile-office-dialog"
-                 :title="fileDataStore.currentClickRow.name"
-                 v-model="dialogOfficeVisible">
+      <el-dialog
+v-model="dialogOfficeVisible" draggable
+        custom-class="zfile-office-dialog"
+        :title="fileDataStore.currentClickRow.name"
+      >
         <OfficeViewer
+          v-if="dialogOfficeVisible"
           :file-name="fileDataStore.currentClickRow.name"
-          :file-url="fileDataStore.currentClickRow.url"
-          v-if="dialogOfficeVisible"/>
+          :file-url="fileDataStore.currentClickRow.url"/>
       </el-dialog>
 
       <!-- 3d 在线预览 -->
-      <el-dialog draggable custom-class="zfile-3d-dialog"
-                 :title="fileDataStore.currentClickRow.name"
-                 v-model="dialog3dVisible">
+      <el-dialog
+v-model="dialog3dVisible" draggable
+        custom-class="zfile-3d-dialog"
+        :title="fileDataStore.currentClickRow.name"
+      >
         <Three3dPreview
+          v-if="dialog3dVisible"
           :file-name="fileDataStore.currentClickRow.name"
-          :file-url="fileDataStore.currentClickRow.url"
-           v-if="dialog3dVisible"/>
+           :file-url="fileDataStore.currentClickRow.url"/>
       </el-dialog>
 
       <!-- 生成直链 -->
@@ -281,31 +372,50 @@
       <audio-player></audio-player>
 
       <!-- 回到顶部 -->
-      <back-top v-show="globalConfigStore.zfileConfig.gallery.showBackTop"></back-top>
+      <back-top
+        v-show="globalConfigStore.zfileConfig.gallery.showBackTop"
+      ></back-top>
 
       <!-- 弹窗文档 -->
-      <el-dialog draggable
-                 @close="readmeDialogClose"
+      <el-dialog
+        v-if="
+          storageConfigStore.globalConfig.showDocument &&
+          storageConfigStore.folderConfig.readmeText &&
+          storageConfigStore.folderConfig.readmeDisplayMode === 'dialog' &&
+          showDialog(storageConfigStore.folderConfig.readmeText)
+        "
+        draggable
                  custom-class="zfile-readme-dialog zfile-dialog-mini-close zfile-dialog-hidden-title"
-                 v-if="storageConfigStore.globalConfig.showDocument
-                 && storageConfigStore.folderConfig.readmeText
-                 && storageConfigStore.folderConfig.readmeDisplayMode === 'dialog'
-                 && showDialog(storageConfigStore.folderConfig.readmeText)" :model-value="true">
-        <v-md-preview :text="storageConfigStore.folderConfig.readmeText"></v-md-preview>
+        :model-value="true"
+        @close="readmeDialogClose"
+      >
+        <v-md-preview
+          :text="storageConfigStore.folderConfig.readmeText"
+        ></v-md-preview>
       </el-dialog>
 
       <!-- 底部文档 -->
-      <el-card class="mt-5" v-if="storageConfigStore.globalConfig.showDocument
+      <el-card
+v-if="storageConfigStore.globalConfig.showDocument
                   && storageConfigStore.folderConfig.readmeText
-                  && storageConfigStore.folderConfig.readmeDisplayMode === 'bottom'">
-        <v-md-preview :text="storageConfigStore.folderConfig.readmeText"></v-md-preview>
+          storageConfigStore.folderConfig.readmeDisplayMode === 'bottom'
+        " class="mt-5"
+      >
+        <v-md-preview
+          :text="storageConfigStore.folderConfig.readmeText"
+        ></v-md-preview>
       </el-card>
 
       <!-- 悬浮菜单 -->
-      <transition enter-active-class="animate__animated animate__fadeInUp animate__faster"
-                  leave-active-class="animate__animated animate__fadeOutDown animate__faster">
-        <div v-show="selectRows.length > 0 && route.params.storageKey && !fileDataStore.imgMode && linkVisible === false"
-             class="zfile-index-hover-tools">
+      <transition
+        enter-active-class="animate__animated animate__fadeInUp animate__faster"
+        leave-active-class="animate__animated animate__fadeOutDown animate__faster"
+      >
+        <div
+v-show="selectRows.length > 0 && route.params.storageKey && !fileDataStore.imgMode && linkVisible === false"
+          "
+          class="zfile-index-hover-tools"
+        >
           <div class="zfile-index-hover-body">
             <template v-if="storageConfigStore.permission.preview">
               <el-tooltip
@@ -313,8 +423,12 @@
                 :offset="15"
                 effect="dark"
                 content="预览"
-                placement="top">
-                <svg-icon @click="openRow(selectRow)" name="tool-preview"></svg-icon>
+                placement="top"
+              >
+                <svg-icon
+                  name="tool-preview"
+                  @click="openRow(selectRow)"
+                ></svg-icon>
               </el-tooltip>
             </template>
 
@@ -324,8 +438,12 @@
                 :offset="15"
                 effect="dark"
                 content="下载"
-                placement="top">
-                <svg-icon @click="batchDownloadFile" name="tool-download"></svg-icon>
+                placement="top"
+              >
+                <svg-icon
+                  name="tool-download"
+                  @click="batchDownloadFile"
+                ></svg-icon>
               </el-tooltip>
             </template>
 
@@ -335,8 +453,9 @@
                 :offset="15"
                 effect="dark"
                 content="生成直链"
-                placement="top">
-                <svg-icon @click="openLinkDialog" name="tool-link"></svg-icon>
+                placement="top"
+              >
+                <svg-icon name="tool-link" @click="openLinkDialog"></svg-icon>
               </el-tooltip>
             </template>
 
@@ -346,8 +465,9 @@
                 :offset="15"
                 effect="dark"
                 content="重命名"
-                placement="top">
-                <svg-icon @click="rename" name="tool-edit"></svg-icon>
+                placement="top"
+              >
+                <svg-icon name="tool-edit" @click="rename"></svg-icon>
               </el-tooltip>
             </template>
             <!--<el-tooltip-->
@@ -364,8 +484,9 @@
                 :offset="15"
                 effect="dark"
                 content="删除"
-                placement="top">
-                <svg-icon @click="batchDelete" name="tool-delete"></svg-icon>
+                placement="top"
+              >
+                <svg-icon name="tool-delete" @click="batchDelete"></svg-icon>
               </el-tooltip>
             </template>
 
@@ -375,8 +496,9 @@
               :disabled="selectRows.length === 0"
               effect="dark"
               content="取消选择"
-              placement="top">
-              <svg-icon @click="clearSelection" name="tool-close"></svg-icon>
+              placement="top"
+            >
+              <svg-icon name="tool-close" @click="clearSelection"></svg-icon>
             </el-tooltip>
           </div>
         </div>
@@ -386,49 +508,47 @@
 </template>
 
 <script setup>
-import common from "~/common";
+import common from '~/common'
 
-import MarkdownViewerAsyncLoading from "~/components/file/preview/MarkdownViewerAsyncLoading.vue";
-import MarkdownViewerDialogAsyncLoading from "~/components/file/preview/MarkdownViewerDialogAsyncLoading.vue";
-import VideoPlayerAsyncLoading from "~/components/file/preview/VideoPlayerAsyncLoading.vue";
-import TextViewerAsyncLoading from "~/components/file/preview/TextViewerAsyncLoading.vue";
-import AudioPlayer from "~/components/file/preview/AudioPlayer.vue";
-import BackTop from "~/components/BackTop.vue";
-import SvgIcon from "~/components/SvgIcon.vue";
-import Link from "~/components/file/Link.vue";
-import ZUpload from "~/components/file/ZUpload.vue";
+import MarkdownViewerAsyncLoading from '~/components/file/preview/MarkdownViewerAsyncLoading.vue'
+import MarkdownViewerDialogAsyncLoading from '~/components/file/preview/MarkdownViewerDialogAsyncLoading.vue'
+import VideoPlayerAsyncLoading from '~/components/file/preview/VideoPlayerAsyncLoading.vue'
+import TextViewerAsyncLoading from '~/components/file/preview/TextViewerAsyncLoading.vue'
+import AudioPlayer from '~/components/file/preview/AudioPlayer.vue'
+import BackTop from '~/components/BackTop.vue'
+import SvgIcon from '~/components/SvgIcon.vue'
+import Link from '~/components/file/Link.vue'
+import ZUpload from '~/components/file/ZUpload.vue'
 
-import useFileDataStore from "~/stores/file-data";
-import useStorageConfigStore from "~/stores/storage-config";
-import useGlobalConfigStore from "~/stores/global-config";
+import useFileDataStore from '~/stores/file-data'
+import useStorageConfigStore from '~/stores/storage-config'
+import useGlobalConfigStore from '~/stores/global-config'
 // element 弹窗消息提示相关
 // element table 表格加载动画
-import "~/assets/table-animation.less";
+import '~/assets/table-animation.less'
 // element 图标
-import { Calendar, Coin, Document, FolderOpened } from "@element-plus/icons-vue";
+import { Calendar, Coin, Document, FolderOpened } from '@element-plus/icons-vue'
 
 // 右键菜单
-import { Contextmenu, ContextmenuDivider, ContextmenuItem } from "v-contextmenu";
-import useFileContextMenu from "~/composables/file/useFileContextMenu";
+import { Contextmenu, ContextmenuDivider, ContextmenuItem } from 'v-contextmenu'
+import useFileContextMenu from '~/composables/file/useFileContextMenu'
 
 // 文件类别数据相关
-import useFileData from "~/composables/file/useFileData";
+import useFileData from '~/composables/file/useFileData'
 // 直链相关
-import useFileLink from "~/composables/file/useFileLink";
+import useFileLink from '~/composables/file/useFileLink'
 // 表格相关基础操作
-import useTableOperator from "~/composables/file/useTableOperator";
+import useTableOperator from '~/composables/file/useTableOperator'
 // 文件预览相关
-import useFilePreview from "~/composables/file/useFilePreview";
+import useFilePreview from '~/composables/file/useFilePreview'
 // 文件操作相关
-import useFileOperator from "~/composables/file/useFileOperator";
+import useFileOperator from '~/composables/file/useFileOperator'
 
-
-import useCommon from "~/composables/useCommon";
-import useFileSelect from "~/composables/file/useFileSelect";
+import useCommon from '~/composables/useCommon'
+import useFileSelect from '~/composables/file/useFileSelect'
 // 文件上传相关
-import useFileUpload from "~/composables/file/useFileUpload";
-import useRouterData from "~/composables/useRouterData";
-
+import useFileUpload from '~/composables/file/useFileUpload'
+import useRouterData from '~/composables/useRouterData'
 
 // markdown viewer 组件懒加载, 节约首屏打开时间
 const VMdPreview = defineAsyncComponent({
@@ -437,13 +557,15 @@ const VMdPreview = defineAsyncComponent({
       ;(async function () {
         try {
           const res = await import('@kangc/v-md-editor/lib/preview')
-          import('@kangc/v-md-editor/lib/style/preview.css');
-          import('@kangc/v-md-editor/lib/theme/style/github.css');
-          const hljs = await import('highlight.js');
-          const githubTheme = await import('@kangc/v-md-editor/lib/theme/github.js');
+          import('@kangc/v-md-editor/lib/style/preview.css')
+          import('@kangc/v-md-editor/lib/theme/style/github.css')
+          const hljs = await import('highlight.js')
+          const githubTheme = await import(
+            '@kangc/v-md-editor/lib/theme/github.js'
+          )
           res.use(githubTheme, {
             Hljs: hljs,
-          });
+          })
           resolve(res)
         } catch (error) {
           reject(error)
@@ -451,116 +573,144 @@ const VMdPreview = defineAsyncComponent({
       })()
     })
   },
-  loadingComponent: MarkdownViewerAsyncLoading
+  loadingComponent: MarkdownViewerAsyncLoading,
 })
 
 // 文件预览相关, 视频、音频、文本、图片
 const VideoPlayer = defineAsyncComponent({
-  loader: () => import("~/components/file/preview/VideoPlayer.vue"),
-  loadingComponent: VideoPlayerAsyncLoading
+  loader: () => import('~/components/file/preview/VideoPlayer.vue'),
+  loadingComponent: VideoPlayerAsyncLoading,
 })
 const TextViewer = defineAsyncComponent({
-  loader: () => import("~/components/file/preview/TextViewer.vue"),
-  loadingComponent: TextViewerAsyncLoading
+  loader: () => import('~/components/file/preview/TextViewer.vue'),
+  loadingComponent: TextViewerAsyncLoading,
 })
 const MarkdownViewer = defineAsyncComponent({
-  loader: () => import("~/components/file/preview/MarkdownViewer.vue"),
-  loadingComponent: MarkdownViewerDialogAsyncLoading
+  loader: () => import('~/components/file/preview/MarkdownViewer.vue'),
+  loadingComponent: MarkdownViewerDialogAsyncLoading,
 })
 const PdfViewer = defineAsyncComponent({
-  loader: () => import("~/components/file/preview/PdfViewer.vue"),
-  loadingComponent: MarkdownViewerDialogAsyncLoading
+  loader: () => import('~/components/file/preview/PdfViewer.vue'),
+  loadingComponent: MarkdownViewerDialogAsyncLoading,
 })
 const OfficeViewer = defineAsyncComponent({
-  loader: () => import("~/components/file/preview/OfficeViewer.vue"),
-  loadingComponent: MarkdownViewerDialogAsyncLoading
+  loader: () => import('~/components/file/preview/OfficeViewer.vue'),
+  loadingComponent: MarkdownViewerDialogAsyncLoading,
 })
 const Three3dPreview = defineAsyncComponent({
-  loader: () => import("~/components/file/preview/Three3dPreview.vue"),
-  loadingComponent: MarkdownViewerDialogAsyncLoading
+  loader: () => import('~/components/file/preview/Three3dPreview.vue'),
+  loadingComponent: MarkdownViewerDialogAsyncLoading,
 })
 
-const FileGallery = defineAsyncComponent(() => import("~/components/file/preview/FileGallery.vue"))
+const FileGallery = defineAsyncComponent(() =>
+  import('~/components/file/preview/FileGallery.vue')
+)
 
-const { isNotMobile } = useCommon();
+const { isNotMobile } = useCommon()
 
-let route = useRoute();
-let router = useRouter();
+let route = useRoute()
+let router = useRouter()
 
-let fileDataStore = useFileDataStore();
-let storageConfigStore = useStorageConfigStore();
-let globalConfigStore = useGlobalConfigStore();
+let fileDataStore = useFileDataStore()
+let storageConfigStore = useStorageConfigStore()
+let globalConfigStore = useGlobalConfigStore()
 
-const currentInstance = getCurrentInstance();
-const { showFileMenu, contextMenuTargetFile } = useFileContextMenu(currentInstance);
+const currentInstance = getCurrentInstance()
+const { showFileMenu, contextMenuTargetFile } =
+  useFileContextMenu(currentInstance)
 
-let { checkSelectable, selectRowsChange, selectRow, selectRows, selectStatistics, tableRowClassName, clearSelection } = useFileSelect(currentInstance);
-
+let {
+  checkSelectable,
+  selectRowsChange,
+  selectRow,
+  selectRows,
+  selectStatistics,
+  tableRowClassName,
+  clearSelection,
+} = useFileSelect(currentInstance)
 
 // 初始化时，加载文件列表
 onBeforeMount(() => {
-	loadFile();
+  loadFile()
 })
 
 // 切换存储源或路径时，重新加载文件列表
-watch(() => [route.params.storageKey, route.params.fullpath], () => {
-  loadFile();
-})
+watch(
+  () => [route.params.storageKey, route.params.fullpath],
+  () => {
+    loadFile()
+  }
+)
 
 const {
-	openRow, sortChangeMethod,
-	basicLoading, skeletonLoading, skeletonData, loadFile,
-	loadFileConfig } = useFileData();
+  openRow,
+  sortChangeMethod,
+  basicLoading,
+  skeletonLoading,
+  skeletonData,
+  loadFile,
+  loadFileConfig,
+} = useFileData()
 
 // 直链打开
-const { openLinkDialog, visible:linkVisible } = useFileLink();
+const { openLinkDialog, visible: linkVisible } = useFileLink()
 
-const { tableClickRow, tableDbClickRow, tableHoverRow, tableLeaveRow } = useTableOperator();
+const { tableClickRow, tableDbClickRow, tableHoverRow, tableLeaveRow } =
+  useTableOperator()
 
-const { dialogVideoVisible, dialogTextVisible, dialogPdfVisible, dialogOfficeVisible, dialog3dVisible } = useFilePreview();
+const {
+  dialogVideoVisible,
+  dialogTextVisible,
+  dialogPdfVisible,
+  dialogOfficeVisible,
+  dialog3dVisible,
+} = useFilePreview()
 
-const { rename, batchDownloadFile, moveTo, copyTo, newFolder, batchDelete } = useFileOperator();
+const { rename, batchDownloadFile, moveTo, copyTo, newFolder, batchDelete } =
+  useFileOperator()
 
-const { openUploadDialog, openUploadFolderDialog } = useFileUpload();
+const { openUploadDialog, openUploadFolderDialog } = useFileUpload()
 
 const reload = () => {
   window.location.reload()
 }
 
-import md5 from "md5";
-let { storageKey, currentPath } = useRouterData();
+import md5 from 'md5'
+let { storageKey, currentPath } = useRouterData()
 
-const readmeDialogCache = useStorage(`zfile-readme-dialog-cache`, {});
+const readmeDialogCache = useStorage(`zfile-readme-dialog-cache`, {})
 
 const readmeDialogClose = () => {
   ElMessageBox.confirm('在公告变更前是否不再显示此公告?', '提示', {
     confirmButtonText: '是',
     cancelButtonText: '否',
     draggable: true,
-    callback: action => {
+    callback: (action) => {
       if (action === 'confirm') {
-        let key = (storageKey.value + "_" + currentPath.value);
-        readmeDialogCache.value[key] = md5(storageConfigStore.folderConfig.readmeText);
+        let key = storageKey.value + '_' + currentPath.value
+        readmeDialogCache.value[key] = md5(
+          storageConfigStore.folderConfig.readmeText
+        )
       }
-    }
-  });
+    },
+  })
 }
 
 const showDialog = (readmeText) => {
   for (let key of Object.keys(readmeDialogCache.value)) {
-    if (key === (storageKey.value + "_" + currentPath.value)
-        && readmeDialogCache.value[key] === md5(readmeText)) {
-      return false;
+    if (
+      key === storageKey.value + '_' + currentPath.value &&
+      readmeDialogCache.value[key] === md5(readmeText)
+    ) {
+      return false
     }
   }
 
-  return true;
+  return true
 }
-
 </script>
 
 <style lang="scss" scoped>
-
 // 最外层边框
 .zfile-index-body-wrapper {
   @apply h-full;
@@ -585,7 +735,6 @@ const showDialog = (readmeText) => {
     display: initial;
     @apply h-80 w-80;
   }
-
 
   // 公告显示样式
   .zfile-index-announcement {
@@ -619,53 +768,50 @@ const showDialog = (readmeText) => {
     font-weight: 450;
   }
 
-	/* 表头 -- icon 位置和大小 */
-	.el-table__header-wrapper .el-icon {
+  /* 表头 -- icon 位置和大小 */
+  .el-table__header-wrapper .el-icon {
     @apply mr-4 top-0.5 text-sm;
-	}
+  }
 
-	/* 表身 -- 文件名列 icon 位置 */
-	.el-table__body-wrapper .zfile-table-col-name svg {
-		@apply relative -top-[1.5px] align-middle text-xl mr-1.5 inline;
-	}
+  /* 表身 -- 文件名列 icon 位置 */
+  .el-table__body-wrapper .zfile-table-col-name svg {
+    @apply relative -top-[1.5px] align-middle text-xl mr-1.5 inline;
+  }
 
-	/* 表身 -- 不支持文字选中 */
-	:deep(tr) {
+  /* 表身 -- 不支持文字选中 */
+  :deep(tr) {
     @apply select-none;
-	}
+  }
 }
 
 // table default 模式样式
 .el-table.el-table--default {
-
   /* 表头 -- icon 位置和大小 */
   .el-table__header-wrapper .el-icon {
     @apply text-base;
   }
 
-	/* 表身 -- 文件名列 icon 位置 */
-	.el-table__body-wrapper .zfile-table-col-name svg {
-		@apply text-2xl;
-	}
+  /* 表身 -- 文件名列 icon 位置 */
+  .el-table__body-wrapper .zfile-table-col-name svg {
+    @apply text-2xl;
+  }
 }
 
 // table large 模式样式
 .el-table.el-table--large {
-
   /* 表头 -- icon 位置和大小 */
   .el-table__header-wrapper .el-icon {
     @apply text-xl;
   }
 
-	/* 表身 -- 文件名列 icon 位置 */
-	.el-table__body-wrapper .zfile-table-col-name svg {
-		@apply text-3xl;
-	}
+  /* 表身 -- 文件名列 icon 位置 */
+  .el-table__body-wrapper .zfile-table-col-name svg {
+    @apply text-3xl;
+  }
 }
 
 // dialog 相关
 .zfile-index-body {
-
   // zfile dialog body 高度
   .zfile-dialog-body_height {
     @apply h-[80vh] sm:h-[85vh] overflow-auto;
@@ -703,8 +849,8 @@ const showDialog = (readmeText) => {
   }
 
   /* dialog 高度减少，标题居中 */
-	:deep(.el-dialog__header) {
-		@apply -mt-3 py-1 text-center ml-2;
+  :deep(.el-dialog__header) {
+    @apply -mt-3 py-1 text-center ml-2;
 
     /* 修正去除边框后关闭按钮错位的问题 */
     .el-dialog__headerbtn {
@@ -717,10 +863,10 @@ const showDialog = (readmeText) => {
     }
   }
 
-	/* 去除 dialog 打开后默认滚动条 */
-	:deep(.el-overlay-dialog) {
+  /* 去除 dialog 打开后默认滚动条 */
+  :deep(.el-overlay-dialog) {
     @apply overflow-hidden;
-	}
+  }
 
   // dialog 距离顶部的高度
   :deep(.el-dialog) {
@@ -765,38 +911,37 @@ const showDialog = (readmeText) => {
       @apply p-0;
     }
   }
-
 }
 
 // 右键菜单
 .v-contextmenu-item {
-	// 文字和图标的距离
-	:deep(label) {
+  // 文字和图标的距离
+  :deep(label) {
     @apply ml-2.5;
-	}
+  }
 
-	// 图标位置修正为居中
-	:deep(.contextmenu-icon) {
+  // 图标位置修正为居中
+  :deep(.contextmenu-icon) {
     @apply top-[1px] pt-[1px];
-	}
+  }
 }
 
 .zfile-index-body {
   // 工具条
-	.zfile-index-hover-tools {
-		@apply absolute z-10 bottom-0 sm:bottom-10 left-0 right-0 mx-auto w-fit;
+  .zfile-index-hover-tools {
+    @apply absolute z-10 bottom-0 sm:bottom-10 left-0 right-0 mx-auto w-fit;
 
-		.zfile-index-hover-body {
-			@apply bg-[#313136] w-fit px-5 h-12 py-2 text-white rounded mx-auto space-x-6 text-2xl;
+    .zfile-index-hover-body {
+      @apply bg-[#313136] w-fit px-5 h-12 py-2 text-white rounded mx-auto space-x-6 text-2xl;
 
-			svg {
-				@apply inline text-white cursor-pointer outline-none;
-				&:hover {
-					@apply text-blue-400;
-				}
-			}
-		}
-	}
+      svg {
+        @apply inline text-white cursor-pointer outline-none;
+        &:hover {
+          @apply text-blue-400;
+        }
+      }
+    }
+  }
 }
 </style>
 

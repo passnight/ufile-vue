@@ -3,25 +3,28 @@ import fileRoutes from '~pages'
 import { setupLayouts } from 'virtual:meta-layouts'
 import { createRouter, createWebHistory } from 'vue-router'
 
-fileRoutes.push({
-  path: '/',
-  meta: {
-    layout: 'file'
+fileRoutes.push(
+  {
+    path: '/',
+    meta: {
+      layout: 'file',
+    },
+    component: () => import('~/pages/file.vue'),
   },
-  component: () => import('~/pages/file.vue')
-}, {
-  path: '/:storageKey/:fullpath(.*)*',
-  meta: {
-    layout: 'file'
-  },
-  props: true,
-  component: () => import('~/pages/file.vue')
-});
+  {
+    path: '/:storageKey/:fullpath(.*)*',
+    meta: {
+      layout: 'file',
+    },
+    props: true,
+    component: () => import('~/pages/file.vue'),
+  }
+)
 
-let routes = setupLayouts(fileRoutes);
+let routes = setupLayouts(fileRoutes)
 routes.push({
   path: '/admin',
-  redirect: '/admin/site-setting'
+  redirect: '/admin/site-setting',
 })
 export const router = createRouter({
   routes: routes,

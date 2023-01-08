@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 
 // @ts-ignore
-import common from "~/common";
+import common from '~/common'
 
 // 当前存储源的配置信息，数据来源为服务端配置。请求存储源后会获取其配置信息。
 const useFileDataStore = defineStore('fileDataStore', {
@@ -13,8 +13,8 @@ const useFileDataStore = defineStore('fileDataStore', {
         id: null,
         type: {
           description: '',
-          key: ''
-        }
+          key: '',
+        },
       },
       imgMode: false,
       newImgMode: false,
@@ -28,61 +28,62 @@ const useFileDataStore = defineStore('fileDataStore', {
   getters: {
     filterFileByType: (state) => {
       return (type: string) => {
-        return state.fileListSource.filter(function (item:any) {
+        return state.fileListSource.filter(function (item: any) {
           if (item.type === 'BACK') {
             return false
           }
-          let name = item.name;
-          let suffix = name.substr(name.lastIndexOf('.') + 1).toLowerCase();
-          return common.constant.fileTypeMap[type].indexOf(suffix) !== -1;
-        });
-      };
+          let name = item.name
+          let suffix = name.substr(name.lastIndexOf('.') + 1).toLowerCase()
+          return common.constant.fileTypeMap[type].indexOf(suffix) !== -1
+        })
+      }
     },
-    fileList: state => {
-      let tableData = state.fileListSource;
-      tableData.forEach((item:any) => {
+    fileList: (state) => {
+      let tableData = state.fileListSource
+      tableData.forEach((item: any) => {
         // 生成图标
         if (!item.icon) {
-          item['icon'] = common.getFileIconName(item);
+          item['icon'] = common.getFileIconName(item)
         }
         if (item.preview !== null) {
           // 获取文件类型
-          var fileType = common.getFileType(item.name);
+          let fileType = common.getFileType(item.name)
           if (fileType) {
             // 获取文件是否可预览
-            item['fileType'] = fileType;
-            item.preview = common.constant.previewFileType.indexOf(fileType) !== -1;
+            item['fileType'] = fileType
+            item.preview =
+              common.constant.previewFileType.indexOf(fileType) !== -1
           } else {
-            item.preview = false;
+            item.preview = false
           }
         }
-      });
-      return tableData;
+      })
+      return tableData
     },
   },
   actions: {
     updateCurrentStorageSource(val: any) {
-      this.currentStorageSource = val;
+      this.currentStorageSource = val
     },
     updateAudioIndex(val: any) {
-      this.audioIndex = val;
+      this.audioIndex = val
     },
     updateAudioList(val: any) {
-      this.audioArray = val;
+      this.audioArray = val
     },
     updateCurrentClickRow(val: any) {
-      this.currentClickRow = val;
+      this.currentClickRow = val
     },
     updateCurrentRightClickRow(val: any) {
-      this.currentRightClickRow = val;
+      this.currentRightClickRow = val
     },
     updateFileList(val: any) {
-      this.fileListSource = val;
+      this.fileListSource = val
     },
     updateOldStorageKey(val: any) {
-      this.oldStorageKey = val;
+      this.oldStorageKey = val
     },
   },
 })
 
-export default useFileDataStore;
+export default useFileDataStore

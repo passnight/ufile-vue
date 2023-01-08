@@ -9,21 +9,21 @@ type Resolvers = Arrayable<Arrayable<Resolver>>
 export const AutoImportResolvers: Resolvers = [ElementPlusResolver()]
 
 interface Options {
-	onlyExist?: [Arrayable<ComponentResolver>, string][]
-	include?: ComponentResolver[]
+  onlyExist?: [Arrayable<ComponentResolver>, string][]
+  include?: ComponentResolver[]
 }
 export const normalizeResolvers = (options: Options = {}) => {
-	const { onlyExist = [], include = [] } = options
+  const { onlyExist = [], include = [] } = options
 
-	const existedResolvers = []
-	for (let i = 0; i < onlyExist.length; i++) {
-		const [resolver, packageName] = onlyExist[i]
-		if (isPackageExists(packageName)) {
-			existedResolvers.push(resolver)
-		}
-	}
+  const existedResolvers = []
+  for (let i = 0; i < onlyExist.length; i++) {
+    const [resolver, packageName] = onlyExist[i]
+    if (isPackageExists(packageName)) {
+      existedResolvers.push(resolver)
+    }
+  }
 
-	existedResolvers.push(...include)
+  existedResolvers.push(...include)
 
-	return existedResolvers
+  return existedResolvers
 }
