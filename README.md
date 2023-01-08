@@ -1,6 +1,7 @@
-# Z-File
+# U-File
 
-此仓库是 ZFile 4.0 前端 Vue 仓库, 使用技术为 Vue3、Pinia、VueRoute、Axios、Element Plus 等.
+此仓库是 UFile 4.0 前端 Vue 仓库, 使用技术为 Vue3、Pinia、VueRoute、Axios、Element Plus 等.
+master 分支置空
 
 预览地址: [http://zfile.vip](http://zfile.vip)
 后端代码: [https://github.com/zhaojun1998/zfile](https://github.com/zhaojun1998/zfile)
